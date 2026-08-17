@@ -9,3 +9,4 @@ coverage/
 *.log
 *.zip
 *.tar.gz
+.DS_Store
