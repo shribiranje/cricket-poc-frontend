@@ -1,0 +1,205 @@
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: #0b1120;
+  color: #e6eaf3;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.spacer { flex: 1 1 auto; }
+
+/* Broadcast palette helpers */
+:root {
+  --bc-bg:        #0b1120;
+  --bc-panel:     #10182b;
+  --bc-panel-2:   #182238;
+  --bc-border:    #22304d;
+  --bc-text:      #ffffff;
+  --bc-muted:     #8b98b8;
+  --bc-faint:     #56617a;
+  --bc-accent:    #4fc3f7;
+  --bc-gold:      #ffb74d;
+  --bc-red:       #ff8a8a;
+  --bc-green:     #a5d6a7;
+}
+
+.bc-panel {
+  background: var(--bc-panel);
+  border: 1px solid var(--bc-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bc-panel-header {
+  background: var(--bc-panel-2);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.team-badge {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 500; font-size: 12px; flex-shrink: 0;
+}
+
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bc-panel-2);
+  flex-shrink: 0;
+}
+
+/* mobile-friendly card grids */
+.grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+@supports not (display: grid) {
+  .grid { display: block; }
+  .grid > * { margin-bottom: 12px; display: block; }
+}
+
+.role-chip {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.role-BATSMAN       { background: rgba(127,179,245,.15); color: #7fb3f5; }
+.role-BOWLER        { background: rgba(239,154,154,.15); color: #ef9a9a; }
+.role-ALL_ROUNDER   { background: rgba(165,214,167,.15); color: #a5d6a7; }
+.role-WICKET_KEEPER { background: rgba(255,204,128,.15); color: #ffcc80; }
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.status-UPCOMING  { background: rgba(79,195,247,.15); color: #4fc3f7; }
+.status-LIVE      { background: rgba(255,82,82,.18);  color: #ff8a8a; }
+.status-COMPLETED { background: rgba(139,152,184,.15); color: #8b98b8; }
+.status-LIVE::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: #ff5252; animation: bc-pulse 1.5s infinite;
+}
+@keyframes bc-pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+.error-text { color: #ff8a8a; }
+
+/* Broadcast table */
+.bc-table { width: 100%; border-collapse: collapse; }
+.bc-table th {
+  text-align: left; padding: 8px 14px;
+  color: var(--bc-muted); font-size: 10px; font-weight: 500; letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.bc-table td { padding: 8px 14px; color: var(--bc-text); font-size: 13px; }
+.bc-table tbody tr { border-top: 1px solid var(--bc-border); }
+.bc-table .num-col { text-align: right; }
+.bc-pts { color: var(--bc-accent); font-size: 16px; font-weight: 500; }
+.bc-pts-zero { color: var(--bc-faint); font-size: 16px; font-weight: 500; }
+
+/* Cricket pitch (team builder preview) */
+.pitch {
+  background: #2e7d46;
+  border-radius: 12px;
+  padding: 16px 8px 12px;
+  position: relative;
+  overflow: hidden;
+}
+.pitch::before {
+  content: '';
+  position: absolute; inset: 8px;
+  border: 1.5px solid rgba(255,255,255,.25);
+  border-radius: 50%/40%;
+  pointer-events: none;
+}
+.pitch::after {
+  content: '';
+  position: absolute; left: 50%; top: 12%; bottom: 12%;
+  width: 40px; transform: translateX(-50%);
+  background: #c8b273; opacity: .45; border-radius: 6px;
+  pointer-events: none;
+}
+.pitch-row-label {
+  position: relative; z-index: 1;
+  text-align: center; margin: 6px 0 2px;
+  font-size: 10px; font-weight: 500; letter-spacing: 1px;
+  color: rgba(255,255,255,.85);
+}
+.pitch-row {
+  position: relative; z-index: 1;
+  display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.pitch-player { text-align: center; width: 70px; position: relative; }
+.pitch-player img {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 2px solid #fff; background: #10182b;
+}
+.pitch-player.is-captain img      { border: 2.5px solid #EF9F27; }
+.pitch-player.is-vice-captain img { border: 2.5px solid #d7dbe0; }
+.pitch-player .pp-name {
+  background: #fff; border-radius: 8px; margin-top: -6px;
+  padding: 2px 4px; font-size: 10px; font-weight: 500; color: #1a1a1a;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pitch-player .pp-sub { font-size: 10px; font-weight: 500; margin-top: 2px; color: rgba(255,255,255,.7); }
+.pitch-player .pp-sub.scored { color: #ffd54f; }
+.pitch-player .pp-tag {
+  position: absolute; top: -7px; right: 2px; z-index: 2;
+  font-size: 9px; font-weight: 500; padding: 1px 6px; border-radius: 8px;
+}
+.pitch-player .pp-tag.c  { background: #EF9F27; color: #412402; }
+.pitch-player .pp-tag.vc { background: #d7dbe0; color: #2C2C2A; }
+.pitch-slot-empty {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 2px dashed rgba(255,255,255,.4);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,.5); font-size: 16px; margin: 0 auto;
+}
+
+/* Material tweaks for dark navy */
+.mat-mdc-card { background: var(--bc-panel) !important; color: var(--bc-text) !important; border: 1px solid var(--bc-border); }
+.mat-mdc-table { background: transparent !important; }
+.mat-mdc-header-cell { color: var(--bc-muted) !important; }
+.mat-mdc-cell { color: var(--bc-text) !important; }
+
+/* Outlined form fields on dark panels (login / register / dialogs) */
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: var(--bc-border);
+  --mdc-outlined-text-field-hover-outline-color: var(--bc-muted);
+  --mdc-outlined-text-field-focus-outline-color: var(--bc-accent);
+  --mdc-outlined-text-field-label-text-color: var(--bc-muted);
+  --mdc-outlined-text-field-hover-label-text-color: var(--bc-text);
+  --mdc-outlined-text-field-focus-label-text-color: var(--bc-accent);
+  --mdc-outlined-text-field-input-text-color: var(--bc-text);
+  --mdc-outlined-text-field-caret-color: var(--bc-accent);
+}
+.mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  background: var(--bc-panel-2);
+}
+.mat-mdc-form-field input.mat-mdc-input-element,
+.mat-mdc-form-field textarea.mat-mdc-input-element {
+  color: var(--bc-text) !important;
+}
+.mat-mdc-form-field .mdc-floating-label {
+  color: var(--bc-muted);
+}
+a { color: var(--bc-accent); }
