@@ -7,20 +7,49 @@ on:
 
 jobs:
   deploy:
+    name: Build and Deploy Frontend
     runs-on: ubuntu-latest
 
     steps:
+
+      # ----------------------------------------
+      # 1. Checkout source code
+      # ----------------------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
+
+      # ----------------------------------------
+      # 2. Build Docker image
+      # ----------------------------------------
       - name: Build Docker image
         run: |
-          docker build -t cricket-web:poc .
+          docker build \
+            -t cricket-web:poc \
+            .
 
+
+      # ----------------------------------------
+      # 3. Verify Docker image
+      # ----------------------------------------
+      - name: Verify Docker image
+        run: |
+          docker images cricket-web
+
+
+      # ----------------------------------------
+      # 4. Save Docker image
+      # ----------------------------------------
       - name: Save Docker image
         run: |
           docker save cricket-web:poc | gzip > frontend-image.tar.gz
 
+          ls -lh frontend-image.tar.gz
+
+
+      # ----------------------------------------
+      # 5. Copy Docker image to EC2
+      # ----------------------------------------
       - name: Copy Docker image to EC2
         uses: appleboy/scp-action@v1.0.0
         with:
@@ -30,27 +59,52 @@ jobs:
           source: "frontend-image.tar.gz"
           target: "/home/ec2-user/"
 
+
+      # ----------------------------------------
+      # 6. Deploy Frontend on EC2
+      # ----------------------------------------
       - name: Deploy Frontend on EC2
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+
           script: |
             set -e
 
-            echo "Loading new frontend Docker image..."
+            echo "======================================"
+            echo "Starting Frontend Deployment"
+            echo "======================================"
+
+            echo "Loading Docker image..."
+
             gunzip -c /home/ec2-user/frontend-image.tar.gz | docker load
+
+            echo "Docker image loaded successfully."
+
+            echo "Changing to deployment directory..."
 
             cd /home/ec2-user/cricket-poc/dist_20260715/deploy
 
-            echo "Deploying frontend container..."
+            echo "Checking current containers..."
+
+            docker compose ps
+
+            echo "Deploying new frontend container..."
+
             docker compose up -d --no-deps web
 
-            echo "Removing temporary image..."
+            echo "Frontend container deployed."
+
+            echo "Removing temporary image file..."
+
             rm -f /home/ec2-user/frontend-image.tar.gz
 
-            echo "Checking containers..."
-            docker ps
+            echo "Checking final containers..."
 
-            echo "Frontend deployment completed successfully!"
+            docker compose ps
+
+            echo "======================================"
+            echo "Frontend Deployment Completed"
+            echo "======================================"
