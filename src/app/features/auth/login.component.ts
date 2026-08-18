@@ -19,7 +19,7 @@ import { environment } from '../../../environments/environment';
   template: `
     <div class="auth-wrap">
       <mat-card class="auth-card">
-        <h1 class="title">{{ isAdminApp ? 'Admin login' : 'Log in' }}</h1>
+        <h1 class="title">{{ isAdminApp ? 'Admin_login' : 'Log in' }}</h1>
         <p class="sub" *ngIf="!isAdminApp">Sign in to play fantasy cricket</p>
         <p class="sub" *ngIf="isAdminApp">Sign in to the admin console</p>
 
