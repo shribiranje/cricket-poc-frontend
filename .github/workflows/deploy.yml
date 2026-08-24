@@ -12,99 +12,55 @@ jobs:
 
     steps:
 
-      # ----------------------------------------
       # 1. Checkout source code
-      # ----------------------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
-
-      # ----------------------------------------
-      # 2. Build Docker image
-      # ----------------------------------------
-      - name: Build Docker image
-        run: |
-          docker build \
-            -t cricket-web:poc \
-            .
-
-
-      # ----------------------------------------
-      # 3. Verify Docker image
-      # ----------------------------------------
-      - name: Verify Docker image
-        run: |
-          docker images cricket-web
-
-
-      # ----------------------------------------
-      # 4. Save Docker image
-      # ----------------------------------------
-      - name: Save Docker image
-        run: |
-          docker save cricket-web:poc | gzip > frontend-image.tar.gz
-
-          ls -lh frontend-image.tar.gz
-
-
-      # ----------------------------------------
-      # 5. Copy Docker image to EC2
-      # ----------------------------------------
-      - name: Copy Docker image to EC2
-        uses: appleboy/scp-action@v1.0.0
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "frontend-image.tar.gz"
-          target: "/home/ec2-user/"
+          node-version: 18
+          cache: npm
 
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
 
-      # ----------------------------------------
-      # 6. Deploy Frontend on EC2
-      # ----------------------------------------
-      - name: Deploy Frontend on EC2
-        uses: appleboy/ssh-action@v1.2.0
+      # 4. Build Angular application
+      - name: Build Angular
+        run: npm run build -- --configuration production
+
+      # 5. Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-          script: |
-            set -e
+      # 6. Upload Angular build to S3
+      - name: Deploy to S3
+        run: |
+          aws s3 sync \
+            dist/fantasy-poc/browser \
+            s3://${{ secrets.S3_BUCKET_NAME }} \
+            --delete
 
-            echo "======================================"
-            echo "Starting Frontend Deployment"
-            echo "======================================"
+      # 7. Invalidate CloudFront cache
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
 
-            echo "Loading Docker image..."
-
-            gunzip -c /home/ec2-user/frontend-image.tar.gz | docker load
-
-            echo "Docker image loaded successfully."
-
-            echo "Changing to deployment directory..."
-
-            cd /home/ec2-user/cricket-poc/dist_20260715/deploy
-
-            echo "Checking current containers..."
-
-            docker compose ps
-
-            echo "Deploying new frontend container..."
-
-            docker compose up -d --no-deps web
-
-            echo "Frontend container deployed."
-
-            echo "Removing temporary image file..."
-
-            rm -f /home/ec2-user/frontend-image.tar.gz
-
-            echo "Checking final containers..."
-
-            docker compose ps
-
-            echo "======================================"
-            echo "Frontend Deployment Completed"
-            echo "======================================"
+      # 8. Deployment completed
+      - name: Deployment completed
+        run: |
+          echo "======================================"
+          echo "Frontend Deployment Completed"
+          echo "======================================"
+          echo "Angular Build       : SUCCESS"
+          echo "S3 Upload           : SUCCESS"
+          echo "CloudFront Cache    : INVALIDATED"
+          echo "======================================"
