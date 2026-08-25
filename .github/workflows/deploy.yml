@@ -12,26 +12,21 @@ jobs:
 
     steps:
 
-      # 1. Checkout source code
-      - name: Checkout code
+      - name: Checkout source code
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: npm
 
-      # 3. Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 4. Build Angular application
       - name: Build Angular
         run: npm run build -- --configuration production
 
-      # 5. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -39,22 +34,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 6. Upload Angular build to S3
       - name: Deploy to S3
         run: |
           aws s3 sync \
-            dist/fantasy-poc/browser \
-            s3://${{ secrets. anguler-project-new }} \
+            dist/fantasy-poc/browser/ \
+            s3://${{ secrets.S3_BUCKET }} \
             --delete
 
-      # 7. Invalidate CloudFront cache
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets. E3D84TE1CQO49C }} \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
 
-      # 8. Deployment completed
       - name: Deployment completed
         run: |
           echo "======================================"
