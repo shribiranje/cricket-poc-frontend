@@ -5,6 +5,8 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 jobs:
   deploy:
     name: Build and Deploy Frontend
@@ -12,7 +14,7 @@ jobs:
 
     steps:
 
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -30,21 +32,25 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AKIAY4I7R3VYE7PTMHP6 }}
+          aws-secret-access-key: ${{ secrets.NVFvqeXr2UIYkLGnk5nNRTNiyz7Y729D1SZr6cPc }}
+          aws-region: eu-west-2
 
-      - name: Deploy to S3
+      - name: Check S3 bucket
+        run: |
+          aws s3 ls s3://anguler-project-new
+
+      - name: Deploy Frontend to S3
         run: |
           aws s3 sync \
             dist/fantasy-poc/browser/ \
-            s3://${{ secrets.S3_BUCKET }} \
+            s3://anguler-project-new \
             --delete
 
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --distribution-id E3D84TE1CQO49C \
             --paths "/*"
 
       - name: Deployment completed
@@ -52,7 +58,9 @@ jobs:
           echo "======================================"
           echo "Frontend Deployment Completed"
           echo "======================================"
-          echo "Angular Build       : SUCCESS"
-          echo "S3 Upload           : SUCCESS"
-          echo "CloudFront Cache    : INVALIDATED"
+          echo "S3 Bucket        : anguler-project-new"
+          echo "AWS Region       : eu-west-2"
+          echo "CloudFront ID    : E3D84TE1CQO49C"
+          echo "S3 Upload        : SUCCESS"
+          echo "CloudFront       : INVALIDATED"
           echo "======================================"
