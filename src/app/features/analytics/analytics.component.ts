@@ -59,7 +59,7 @@ import { PieChartComponent, BarChartComponent } from '../../components/charts/ch
       </div>
 
       <div class="bc-panel" style="margin-top:16px;">
-        <div class="bc-panel-header"><span>Last 14 days — bets & net shri</span></div>
+        <div class="bc-panel-header"><span>Last 14 days — bets & net shrii</span></div>
         <div class="pad">
           <div class="dual">
             <div>
