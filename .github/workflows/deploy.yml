@@ -44,14 +44,14 @@ jobs:
         run: |
           aws s3 sync \
             dist/fantasy-poc/browser \
-            s3://${{ secrets.S3_BUCKET_NAME }} \
+            s3://${{ secrets. anguler-project-new }} \
             --delete
 
       # 7. Invalidate CloudFront cache
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --distribution-id ${{ secrets. E3D84TE1CQO49C }} \
             --paths "/*"
 
       # 8. Deployment completed
